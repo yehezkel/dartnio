@@ -1,0 +1,9 @@
+name: dartnio
+version: 0.0.1-dev
+description: >- 
+  A minio s3 storage server client. Work in process
+homepage: https://github.com/yehezkel/dartnio
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
