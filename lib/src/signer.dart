@@ -1,6 +1,7 @@
 
 import 'package:http/http.dart' as http;
 import 'credentials.dart';
+import 'credentials.dart';
 
 abstract class Signer {
 
@@ -22,6 +23,14 @@ class AwsV4HeaderSigner implements Signer {
       target.headers["X-Amz-Security-Token"] = credentials.SessionToken;
     }
 
+    return target;
+  }
+}
+
+class AwsV4QuerySigner implements Signer {
+  final CredentialProvider _provider;
+
+  http.Request Sign(http.Request target) {
     return target;
   }
 }

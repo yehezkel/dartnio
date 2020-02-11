@@ -10,19 +10,11 @@ import 'signer.dart';
 import 'package:http/http.dart' as http;
 
 class Client {
-  final String _endpoint;
-  final String _accessKey;
-  final String _secretKey;
 
   UrlBuilder _urlBuilder;
-  CredentialProvider _credentailSource;
-  Signer signer;
+  Signer _signer;
 
-  Client(this._endpoint, this._accessKey, this._secretKey) {
-    //url builder temporarly fixing path based
-    this._urlBuilder = PathUrlBuilder(this._endpoint);
-
-  }
+  Client(this._urlBuilder, this._signer);
 
 
   ApiResponse DoRequest(ApiRequest request) {
@@ -37,11 +29,21 @@ class Client {
     //move from apirequest to initialhttp request
 
     //sign request
-    var fullRequest = this.signer.Sign(initialHttp);
+    var fullRequest = this._signer.Sign(initialHttp);
 
     var client = http.Client();
     client.send(fullRequest);
     //wrapp above response on this
     return ApiResponse();
   }
+}
+
+Client NewClient(String endpoint, String accessKey, String secretKey) {
+
+  var provider = HardCodedCredentials(accessKey, secretKey);
+
+  return Client(
+    PathUrlBuilder(endpoint),
+    AwsV4HeaderSigner(provider)
+  );
 }
