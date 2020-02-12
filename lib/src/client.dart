@@ -25,16 +25,25 @@ class Client {
       request.Lookup("location") //check for global location
     );
 
-    var initialHttp = http.Request(request.Lookup("method"),Uri.parse(initialUri));
-    //move from apirequest to initialhttp request
+    var uri = Uri.parse(initialUri);
+    var originNoScheme = uri.host;
+    if (uri.hasPort) {
+      originNoScheme += ":${uri.port}";
+    }
 
+    //move from apirequest to initialhttp request
+    var initialHttp = http.Request(request.Lookup("method"),uri);
+
+    initialHttp.headers['Host'] = originNoScheme;
     //sign request
     var fullRequest = this._signer.Sign(initialHttp);
 
     var client = http.Client();
-    client.send(fullRequest);
-    //wrapp above response on this
-    return ApiResponse();
+    return ApiResponse(client.send(fullRequest)
+    .whenComplete(() {
+      print("completed on client");
+      client.close();
+    }));
   }
 }
 

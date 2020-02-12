@@ -12,12 +12,12 @@ List<Bucket> ListBuckets (Client client) {
   return [];
 }
 
-bool BucketExists(String, name, Client client) {
+bool BucketExists(String name, Client client) {
 
   //todo: validate request 
   var payload = ApiRequest({
     "method": "HEAD",
-    "bucketName": name,   
+    "bucket": name,   
   });
 
   client.DoRequest(payload);
