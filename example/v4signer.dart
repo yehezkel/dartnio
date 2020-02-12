@@ -23,16 +23,14 @@ void main(){
   final signer = AwsV4HeaderSigner(cprovider);
 
   final targetUri = Uri.parse("https://examplebucket.s3.amazonaws.com/test\$file.text");
-  final t = DateTime.parse("20130524T000000Z").toUtc();
   var request = http.Request("PUT", targetUri);
   request.body = "Welcome to Amazon S3.";
   request.headers["Host"]  = targetUri.host;
   request.headers["Date"]  = "Fri, 24 May 2013 00:00:00 GMT";
+  request.headers["X-Amz-Date"]  = "20130524T000000Z";
   request.headers["x-amz-storage-class"] = "REDUCED_REDUNDANCY";
   request.headers.remove("Content-Type");
 
-  var result = signer.Sign(request, t:t);
+  var result = signer.Sign(request);
   print(result.headers);
-
-
 }

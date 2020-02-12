@@ -5,28 +5,53 @@ import 'dart:convert';
 import 'credentials.dart';
 import 'package:convert/convert.dart';
 
+
+abstract class SigningKeyGenerator {
+  List<int> SigningKey(String secretKey, DateTime t, String region, String service);
+}
+
+class AwsV4KeyGenerator implements SigningKeyGenerator {
+
+  List<int> SigningKey(String secretKey, DateTime t, String region, String service) {
+    final dateStr = "${t.year.toString()}${t.month.toString().padLeft(2,'0')}${t.day.toString().padLeft(2,'0')}";
+    return _signer(
+        _signer(
+          _signer(
+            _signer(utf8.encode("AWS4${secretKey}"),dateStr),
+            region,
+          ),
+          service,
+        ),
+        "aws4_request"
+    );
+  }
+}
+
+
 abstract class Signer {
-
   http.Request Sign(http.Request target);
-
 }
 
 class AwsV4HeaderSigner implements Signer {
   
   final CredentialProvider _provider;
+  SigningKeyGenerator _keyGenerator;
   
-  AwsV4HeaderSigner(this._provider);
+  AwsV4HeaderSigner(this._provider, {SigningKeyGenerator keyGenerator}) {
+    this._keyGenerator = keyGenerator ?? AwsV4KeyGenerator();
+  }
 
   http.Request Sign(http.Request target, { DateTime t = null }) {
     var credentials = this._provider.Credentials();
-    if (t == null) {
-      print("here");
-      t = DateTime.now().toUtc();
+    final algo = "AWS4-HMAC-SHA256";
+    final region = credentials.Region;
+
+    var t = DateTime.now().toUtc();
+    //if date already set, use it, specially good for testing
+    if (target.headers.containsKey("X-Amz-Date")) {
+      t = DateTime.parse(target.headers["X-Amz-Date"]);
     }
     
-    final  algo = "AWS4-HMAC-SHA256";
-    final region = "us-east-1"; //see where to locate region
-
     final hashedPayload = HashedPayload(target.body);
     target.headers["X-Amz-Date"] = ToAwsIso8601(t);
     target.headers["X-Amz-Content-Sha256"] = hashedPayload;
@@ -37,11 +62,9 @@ class AwsV4HeaderSigner implements Signer {
 
     final sheaders = SignedHeaders(target.headers);
     
-
     final canonicalRequest = <String>[
       target.method,
-      "/"+target.url.pathSegments.map(Uri.encodeComponent).join("/"),
-      //Uri.encodeComponent(target.url.pathSegments),
+      "/" + target.url.pathSegments.map(Uri.encodeComponent).join("/"),
       CanonicalStringFromQuery(target.url.queryParameters),
       CanonicalStringFromHeaders(target.headers),
       sheaders,
@@ -57,11 +80,7 @@ class AwsV4HeaderSigner implements Signer {
       HashedPayload(canonicalRequest),
     ].join("\n");
 
-    print(canonicalRequest);
-    print("");
-    print(stringToSign);
-
-    final signingKey = SigningKey(credentials.SecretKey,t,region,"s3");
+    final signingKey = this._keyGenerator.SigningKey(credentials.SecretKey,t,region,"s3");
     final signature  = hex.encode(_signer(signingKey, stringToSign));
 
     final authorization = <String>[
@@ -151,22 +170,6 @@ String RequestScope(DateTime t, String region) {
   return [
     dateStr,region, "s3","aws4_request"
   ].join("/");
-}
-
-List<int> SigningKey(String secretKey, DateTime t, String region, String service) {
-
-  final dateStr = "${t.year.toString()}${t.month.toString().padLeft(2,'0')}${t.day.toString().padLeft(2,'0')}";
-  return
-    _signer(
-      _signer(
-        _signer(
-          _signer(utf8.encode("AWS4${secretKey}"),dateStr),
-          region,
-        ),
-        service,
-      ),
-      "aws4_request"
-    );
 }
 
 List<int> _signer(List<int> key, String payload) {
