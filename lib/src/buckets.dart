@@ -1,18 +1,14 @@
 
 import 'client.dart';
 import 'request.dart';
-
-class Bucket {
-  final Name;
-  Bucket(this.Name);
-}
+import "package:http/http.dart" as http;
 
 
 List<Bucket> ListBuckets (Client client) {
   return [];
 }
 
-bool BucketExists(String name, Client client) {
+Future<bool> BucketExists(String name, Client client) {
 
   //todo: validate request 
   var payload = ApiRequest({
@@ -20,6 +16,22 @@ bool BucketExists(String name, Client client) {
     "bucket": name,   
   });
 
-  client.DoRequest(payload);
-  return false;
+  return client.DoRequest(payload).then((resp) {
+    return (resp.statusCode == 200);
+  });
+}
+
+
+Future<String> BucketList(Client client) {
+
+  //todo: validate request 
+  var payload = ApiRequest({
+    "method": "GET",   
+  });
+
+  return client.DoRequest(payload).then((resp) {
+    return http.Response.fromStream(resp);
+  }).then((resp) {
+    return resp.body;
+  });
 }

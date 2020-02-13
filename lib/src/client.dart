@@ -17,8 +17,8 @@ class Client {
   Client(this._urlBuilder, this._signer);
 
 
-  ApiResponse DoRequest(ApiRequest request) {
-
+  Future< http.StreamedResponse> DoRequest(ApiRequest request) {
+   
     var initialUri = this._urlBuilder.BuildUrl(
       request.Lookup("bucket"), 
       request.Lookup("object"),
@@ -39,11 +39,12 @@ class Client {
     var fullRequest = this._signer.Sign(initialHttp);
 
     var client = http.Client();
-    return ApiResponse(client.send(fullRequest)
+    return client
+    .send(fullRequest)
     .whenComplete(() {
       print("completed on client");
       client.close();
-    }));
+    });
   }
 }
 

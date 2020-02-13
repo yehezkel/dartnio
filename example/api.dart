@@ -1,9 +1,8 @@
-import "package:http/http.dart" as http;
 import "../lib/src/client.dart";
 import "../lib/src/buckets.dart" as Bucket;
 
 
-void main() {
+void main() async{
 
   /*var client = NewClient(
       "https://play.min.io", 
@@ -18,7 +17,9 @@ void main() {
   );
 
 
-  var result = Bucket.BucketExists("00test", client);
+  var result = await Bucket.BucketExists("00test", client);
   print(result);
+  var result2 = await Bucket.BucketList(client);
+  print(result2);
 
 }

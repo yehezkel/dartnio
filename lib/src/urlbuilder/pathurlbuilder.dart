@@ -9,6 +9,15 @@ class PathUrlBuilder implements UrlBuilder {
   PathUrlBuilder(this._hostname);
 
   String BuildUrl(String bucket, String object, String location) {
-    return "${this._hostname}/${bucket}";
+
+    var result = this._hostname;
+    if( !(bucket?.isEmpty ?? true) ) {
+      result += "/${bucket}";
+
+      if (!(object?.isEmpty ?? true)){
+        result += "/{object}";
+      }
+    }
+    return result;
   }
 }
