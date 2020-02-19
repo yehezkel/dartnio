@@ -15,7 +15,7 @@ class PathUrlBuilder implements UrlBuilder {
       result += "/${bucket}";
 
       if (!(object?.isEmpty ?? true)){
-        result += "/{object}";
+        result += "/${object}";
       }
     }
     return result;

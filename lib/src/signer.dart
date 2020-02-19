@@ -52,7 +52,7 @@ class AwsV4HeaderSigner implements Signer {
       t = DateTime.parse(target.headers["X-Amz-Date"]);
     }
     
-    final hashedPayload = HashedPayload(target.body);
+    final hashedPayload = HashBinary(target.bodyBytes);
     target.headers["X-Amz-Date"] = ToAwsIso8601(t);
     target.headers["X-Amz-Content-Sha256"] = hashedPayload;
     
@@ -155,11 +155,17 @@ String SignedHeaders(Map<String,String> headers) {
 }
 
 String HashedPayload(String payload) {
+  return HashBinary(
+    utf8.encode(
+      payload
+    )
+  );
+}
+
+String HashBinary(List<int> payload) {
   return hex.encode(
       sha256.convert(
-        utf8.encode(
-          payload
-        )
+        payload
       ).bytes
     );
 }

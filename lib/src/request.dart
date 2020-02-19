@@ -13,4 +13,8 @@ class ApiRequest {
 
     return defvalue;
   }
+
+  bool containsKey(String key) {
+    return this._options.containsKey(key);
+  }
 }

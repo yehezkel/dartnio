@@ -24,7 +24,7 @@ class Client {
       request.Lookup("object"),
       request.Lookup("location") //check for global location
     );
-
+    
     var uri = Uri.parse(initialUri);
     var originNoScheme = uri.host;
     if (uri.hasPort) {
@@ -35,6 +35,18 @@ class Client {
     var initialHttp = http.Request(request.Lookup("method"),uri);
 
     initialHttp.headers['Host'] = originNoScheme;
+
+    if (request.containsKey("contentType")) {
+      initialHttp.headers["content-type"] = request.Lookup("contentType");
+    }
+
+    if (request.containsKey("body")) {
+      initialHttp.body = request.Lookup("body");
+    }
+
+    if (request.containsKey("bodyBytes")) {
+      initialHttp.bodyBytes = request.Lookup("bodyBytes");
+    }
     //sign request
     var fullRequest = this._signer.Sign(initialHttp);
 
