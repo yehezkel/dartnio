@@ -1,9 +1,10 @@
 //import 'dart:html';
 import 'dart:io';
 
-import "../lib/src/request.dart";
+//import "../lib/src/request.dart";
 import "../lib/src/client.dart";
 //import "../lib/src/buckets.dart" as Bucket;
+import "../lib/src/object.dart" as Object;
 
 
 /*void main() async{
@@ -56,7 +57,7 @@ import "../lib/src/client.dart";
 
 
 //put binary
-void main() async{
+/*void main() async{
 
 
   var client = NewClient(
@@ -79,4 +80,15 @@ void main() async{
   var response = await client.DoRequest(payload);
   print(response);
 
+}*/
+
+void main() async {
+  var client = NewClient(
+    "http://172.17.0.2:9000",
+    "minioadmin",
+    "minioadmin"
+  );
+
+  var result = await Object.StatObject("00test", "recaptcha.png",client);
+  print(result);
 }
